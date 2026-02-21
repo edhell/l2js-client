@@ -3,6 +3,7 @@ import { Sex } from "../enums/Sex";
 import { Race } from "../enums/Race";
 import Vector from "../mmocore/Vector";
 import { GlobalEvents } from "../mmocore/EventEmitter";
+import { getClassName } from "../enums/ClassId";
 
 export default abstract class L2Creature extends L2Object {
   private _hp!: number;
@@ -78,6 +79,10 @@ export default abstract class L2Creature extends L2Object {
   }
 
   public get ClassName(): string {
+    // If _className is not set, derive it from ClassId
+    if (!this._className && this._classId !== undefined) {
+      return getClassName(this._classId);
+    }
     return this._className;
   }
 

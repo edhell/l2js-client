@@ -123,3 +123,147 @@ export enum ClassId {
   Inspector = 0x87,
   Judicator = 0x88,
 }
+
+/**
+ * Mapping of ClassId to human-readable class names
+ * Supports Interlude (Protocol 746) and High Five class lists
+ */
+const CLASS_NAMES: { [key: number]: string } = {
+  // Human Fighter
+  [ClassId.Fighter]: "Human Fighter",
+  [ClassId.Warrior]: "Warrior",
+  [ClassId.Gladiator]: "Gladiator",
+  [ClassId.Warlord]: "Warlord",
+  [ClassId.Knight]: "Knight",
+  [ClassId.Paladin]: "Paladin",
+  [ClassId.DarkAvenger]: "Dark Avenger",
+  [ClassId.Rogue]: "Rogue",
+  [ClassId.TreasureHunter]: "Treasure Hunter",
+  [ClassId.Hawkeye]: "Hawkeye",
+
+  // Human Mystic
+  [ClassId.Mage]: "Human Mystic",
+  [ClassId.Wizard]: "Wizard",
+  [ClassId.Sorceror]: "Sorcerer",
+  [ClassId.Necromancer]: "Necromancer",
+  [ClassId.Warlock]: "Warlock",
+  [ClassId.Cleric]: "Cleric",
+  [ClassId.Bishop]: "Bishop",
+  [ClassId.Prophet]: "Prophet",
+
+  // Elven Fighter
+  [ClassId.ElvenFighter]: "Elven Fighter",
+  [ClassId.ElvenKnight]: "Elven Knight",
+  [ClassId.TempleKnight]: "Temple Knight",
+  [ClassId.SwordSinger]: "Swordsinger",
+  [ClassId.ElvenScout]: "Elven Scout",
+  [ClassId.PlainsWalker]: "Plainswalker",
+  [ClassId.SilverRanger]: "Silver Ranger",
+
+  // Elven Mystic
+  [ClassId.ElvenMage]: "Elven Mystic",
+  [ClassId.ElvenWizard]: "Elven Wizard",
+  [ClassId.Spellsinger]: "Spellsinger",
+  [ClassId.ElementalSummoner]: "Elemental Summoner",
+  [ClassId.Oracle]: "Oracle",
+  [ClassId.Elder]: "Elder",
+
+  // Dark Elven Fighter
+  [ClassId.DarkFighter]: "Dark Elven Fighter",
+  [ClassId.PalusKnight]: "Palus Knight",
+  [ClassId.ShillienKnight]: "Shillien Knight",
+  [ClassId.Bladedancer]: "Bladedancer",
+  [ClassId.Assassin]: "Assassin",
+  [ClassId.AbyssWalker]: "Abyss Walker",
+  [ClassId.PhantomRanger]: "Phantom Ranger",
+
+  // Dark Elven Mystic
+  [ClassId.DarkMage]: "Dark Elven Mystic",
+  [ClassId.DarkWizard]: "Dark Wizard",
+  [ClassId.Spellhowler]: "Spellhowler",
+  [ClassId.PhantomSummoner]: "Phantom Summoner",
+  [ClassId.ShillienOracle]: "Shillien Oracle",
+  [ClassId.ShillenElder]: "Shillien Elder",
+
+  // Orc Fighter
+  [ClassId.OrcFighter]: "Orc Fighter",
+  [ClassId.OrcRaider]: "Orc Raider",
+  [ClassId.Destroyer]: "Destroyer",
+  [ClassId.OrcMonk]: "Monk",
+  [ClassId.Tyrant]: "Tyrant",
+
+  // Orc Mystic
+  [ClassId.OrcMage]: "Orc Mystic",
+  [ClassId.OrcShaman]: "Orc Shaman",
+  [ClassId.Overlord]: "Overlord",
+  [ClassId.Warcryer]: "Warcryer",
+
+  // Dwarf Fighter
+  [ClassId.DwarvenFighter]: "Dwarf Fighter",
+  [ClassId.Scavenger]: "Scavenger",
+  [ClassId.BountyHunter]: "Bounty Hunter",
+  [ClassId.Artisan]: "Artisan",
+  [ClassId.Warsmith]: "Warsmith",
+
+  // Third Class (High Five)
+  [ClassId.Duelist]: "Duelist",
+  [ClassId.Dreadnought]: "Dreadnought",
+  [ClassId.PhoenixKnight]: "Phoenix Knight",
+  [ClassId.HellKnight]: "Hell Knight",
+  [ClassId.Sagittarius]: "Sagittarius",
+  [ClassId.Adventurer]: "Adventurer",
+  [ClassId.Archmage]: "Archmage",
+  [ClassId.Soultaker]: "Soultaker",
+  [ClassId.ArcanaLord]: "Arcana Lord",
+  [ClassId.Cardinal]: "Cardinal",
+  [ClassId.Hierophant]: "Hierophant",
+
+  [ClassId.EvaTemplar]: "Eva's Templar",
+  [ClassId.SwordMuse]: "Sword Muse",
+  [ClassId.WindRider]: "Wind Rider",
+  [ClassId.MoonlightSentinel]: "Moonlight Sentinel",
+  [ClassId.MysticMuse]: "Mystic Muse",
+  [ClassId.ElementalMaster]: "Elemental Master",
+  [ClassId.EvaSaint]: "Eva's Saint",
+
+  [ClassId.ShillienTemplar]: "Shillien Templar",
+  [ClassId.SpectralDancer]: "Spectral Dancer",
+  [ClassId.GhostHunter]: "Ghost Hunter",
+  [ClassId.GhostSentinel]: "Ghost Sentinel",
+  [ClassId.StormScreamer]: "Storm Screamer",
+  [ClassId.SpectralMaster]: "Spectral Master",
+  [ClassId.ShillienSaint]: "Shillien Saint",
+
+  [ClassId.Titan]: "Titan",
+  [ClassId.GrandKhavatari]: "Grand Khavatari",
+  [ClassId.Dominator]: "Dominator",
+  [ClassId.Doomcryer]: "Doomcryer",
+
+  [ClassId.FortuneSeeker]: "Fortune Seeker",
+  [ClassId.Maestro]: "Maestro",
+
+  // Kamael
+  [ClassId.MaleSoldier]: "Male Soldier",
+  [ClassId.FemaleSoldier]: "Female Soldier",
+  [ClassId.Trooper]: "Trooper",
+  [ClassId.Warder]: "Warder",
+  [ClassId.Berserker]: "Berserker",
+  [ClassId.MaleSoulbreaker]: "Male Soulbreaker",
+  [ClassId.FemaleSoulbreaker]: "Female Soulbreaker",
+  [ClassId.Arbalester]: "Arbalester",
+  [ClassId.Doombringer]: "Doombringer",
+  [ClassId.MaleSoulhound]: "Male Soulhound",
+  [ClassId.FemaleSoulhound]: "Female Soulhound",
+  [ClassId.Trickster]: "Trickster",
+  [ClassId.Inspector]: "Inspector",
+  [ClassId.Judicator]: "Judicator",
+};
+
+/**
+ * Get the human-readable class name from a ClassId
+ * @param classId - The numeric class ID
+ * @returns The class name or "Unknown Class (ID: X)" if not found
+ */
+export function getClassName(classId: number): string {
+  return CLASS_NAMES[classId] || `Unknown Class (ID: ${classId})`;
+}

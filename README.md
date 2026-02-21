@@ -2,6 +2,8 @@
 
 This project was made while experimenting with TypeScript and es6. The idea is to have an NCSoft Lineage 2 client library, that allows other projects to build L2 client functionalities (like bots, game helpers, etc.) on top of it. It can be also used as a framework for building Lineage2 automated tests for L2 private servers.
 
+**✨ Now supports Lineage 2 Interlude (Protocol 730-746) and works with L2J Java Servers!**
+
 > _Table Of Contents_
 >
 > - [Supported L2 Chronicles](#supported-l2-chronicles)
@@ -35,12 +37,10 @@ This project was made while experimenting with TypeScript and es6. The idea is t
 
 ## Supported L2 Chronicles
 
-For now the library supports only Lineage 2 HighFive:
+The library currently supports:
 
-- protocol version 267 - HighFive
-- protocol version 268 - HighFive Update 1
-- protocol version 271 - HighFive Update 2
-- protocol version 273 - HighFive Update 3
+### Interlude (L2J Java Servers)
+- **protocol version 746** - Interlude
 
 If you are interested in other L2 versions, please leave a comment / open an issue.
 
@@ -58,11 +58,12 @@ If you are interested in other L2 versions, please leave a comment / open an iss
 | 606      | Ertheia Update 1        |        | 851      | Gracia Part 1                 |
 | 603      | Ertheia                 |        | 831      | Hellbound                     |
 | 583      | Valiance Update 4       |        | 828      | The Kamael                    |
-| 581      | Valiance Update 3       |        | 746      | Interlude Update 3            |
-| 580      | Valiance Update 2       |        | 744      | Interlude Update 2            |
-| 578      | Valiance Update 1       |        | 740      | Interlude Update 1            |
-| 575      | Valiance                |        | 737      | Interlude                     |
-| 558      | Lindvior Update 4       |        | 709      | C5 Oath Of Blood Update 2     |
+| 581      | Valiance Update 3       |        | 746      | Interlude Update 3            | ✅     |
+| 580      | Valiance Update 2       |        | 744      | Interlude Update 2            | ✅     |
+| 578      | Valiance Update 1       |        | 740      | Interlude Update 1            | ✅     |
+| 575      | Valiance                |        | 737      | Interlude                     | ✅     |
+| 558      | Lindvior Update 4       |        | 730      | Interlude                     | ✅     |
+| 557      | Lindvior Update 3       |        | 709      | C5 Oath Of Blood Update 2     |        |
 | 557      | Lindvior Update 3       |        | 694      | C5 Oath Of Blood Update 1     |
 | 533      | Lindvior Update 2       |        | 693      | C5 Oath Of Blood              |
 | 532      | Lindvior Update 1       |        | 660      | C4 Scions Of Destiny Update 1 |
@@ -79,19 +80,80 @@ If you are interested in other L2 versions, please leave a comment / open an iss
 | 268      | High Five Update 1      | WIP    |
 | 267      | High Five               | WIP    |
 
-<sup>\* WIP - work in progress</sup>
+<sup>\* WIP - work in progress | ✅ - Supported</sup>
 
 ---
 
 ## Installation
 
-```js
+```bash
 npm install l2js-client
 ```
 
-///@todo
+## Quick Start Guide
+
+### For Development (from source)
+
+If you're working with the source code directly:
+
+1. **Clone or download this repository**
+
+2. **Install dependencies:**
+```bash
+npm install
+```
+
+3. **Compile TypeScript to JavaScript:**
+```bash
+npm run compile
+```
+This creates the `dist/` folder with compiled JavaScript files.
+
+4. **Configure your credentials in `example.js`:**
+```javascript
+const CREDENTIALS = {
+  Username: "your_username",    // Your game account
+  Password: "your_password",    // Your password
+  Ip: "127.0.0.1",             // Your L2 server IP
+  ServerId: 1,                 // Server ID (check AuthServer)
+  CharSlotIndex: 0             // Character slot (0 = first char)
+};
+```
+
+5. **Run the example:**
+```bash
+node example.js
+```
+
+### What the example does:
+
+The `example.js` demonstrates basic bot functionality:
+- ✅ Connects to your Lineage 2 server
+- ✅ Automatically revives if character is dead
+- ✅ Sends a welcome message in chat
+- ✅ Displays character information (name, level, HP, position, etc.)
+- ✅ Moves to a new location (X + 300) after 10 seconds
+
+### Testing with L2J Server
+
+This library works perfectly with **Lineage 2 Java (L2J) servers** using Interlude protocol:
+
+```javascript
+// Example for L2J Interlude Server
+const CREDENTIALS = {
+  Username: "test",
+  Password: "test",
+  Ip: "127.0.0.1",      // or your server IP
+  ServerId: 1,          // Usually 1 for single server
+  CharSlotIndex: 0      // First character
+};
+```
+
+---
 
 ## Examples
+
+> **Note:** All examples work with both **High Five (267-273)** and **Interlude (730-746)** protocols. The library automatically handles protocol differences.
 
 ### Logging in
 

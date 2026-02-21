@@ -1,172 +1,214 @@
 /**
- * Use this example.js file as you wish - it's just a simple demo of how to ue the l2js-client library
- *
- * It is configured to connect to Lineage2 Idle server with a temp account:
- * username: l2js
- * password: passwd
- *
- * If you want, feel free to use this account for testing purposes
+ * L2JS-Client Simple Example
+ * 
+ * This example demonstrates the basic usage of l2js-client library:
+ * - Login and character selection
+ * - Auto-revive if character is dead
+ * - Send a welcome message to the game
+ * - Display character information in console
+ * - Move to a new location (X + 300) after 10 seconds
+ * 
+ * REQUIREMENTS:
+ * 1. The project must be compiled first: npm run compile
+ * 2. Configure your credentials in the CREDENTIALS object below
+ * 3. Make sure your Lineage 2 server is running
+ * 
+ * SUPPORTED PROTOCOLS:
+ * - Protocol 730-746 (Interlude)
+ * 
+ * USAGE:
+ * node example.js
  */
+
 const process = require("process");
-
-const readline = require("readline");
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-
 const Client = require("./dist/Client").default;
 
-process.stdout.write("\u001b[3J\u001b[2J\u001b[1J");
+// Import packets for revive feature
+// RequestRestartPoint: Used to revive character at town/fixed location/agathion
+// Appearing: Confirms the character spawn location after teleport/revive
+const RequestRestartPoint = require('./dist/network/clientpackets/RequestRestartPoint').default;
+const Appearing = require('./dist/network/clientpackets/Appearing').default;
+
+// ==================== CONFIGURATION ====================
+// Configure your Lineage 2 server credentials here
+const CREDENTIALS = {
+  Username: "ed2",        // Your game account username
+  Password: "ed",         // Your game account password
+  Ip: "127.0.0.1",        // Lineage 2 server IP address (localhost or remote)
+  ServerId: 1,            // Server ID to connect (check your AuthServer config)
+  CharSlotIndex: 0        // Character slot (0 = first character, 1 = second, etc.)
+};
+
+// Enable HWID key transform for bot compatibility
+// This is required for some Lineage 2 server implementations
+if (!process.env.L2_HWID_KEY) {
+  process.env.L2_HWID_KEY = '1';
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+
+/**
+ * Log messages with timestamp
+ * @param {string} message - Message to log
+ */
+function log(message) {
+  console.log(`[${new Date().toISOString()}] ${message}`);
+}
+
+/**
+ * Revive character at town when dead
+ * @param {Client} l2 - The L2 client instance
+ * 
+ * This function sends two packets:
+ * 1. RequestRestartPoint - Requests revive at specified location
+ *    - 0 = TOWN (revive at nearest town)
+ *    - 1 = AGATHION (revive using agathion)
+ *    - 2 = FIXED (revive at fixed point)
+ * 2. Appearing - Confirms character appearance at new location
+ */
+function reviveAtTown(l2) {
+  if (!l2 || !l2._gc) {
+    log("Cannot revive: GameClient not ready");
+    return;
+  }
+  
+  try {
+    log("Revivendo na cidade...");
+    
+    // Send revive request (0 = TOWN)
+    const packet = new RequestRestartPoint(0);
+    l2._gc.sendPacket(packet);
+    
+    // After 2 seconds, send Appearing packet to confirm spawn
+    // This is necessary to enable movement after revive/teleport
+    setTimeout(() => {
+      log("Enviando pacote Appearing...");
+      l2._gc.sendPacket(new Appearing());
+    }, 2000);
+  } catch (e) {
+    log(`Erro ao reviver: ${e.message}`);
+  }
+}
+
+// ==================== MAIN CLIENT INITIALIZATION ====================
 console.clear();
 
-var l2 = new Client();
-l2.enter({
-  /* required */ Username: "ed3",
-  /* required */ Password: "ed",
-  /* required */ Ip: "192.168.15.10",
-  /* optional */ ServerId: 1, //Bartz 
-  /* optional */ CharSlotIndex: 0,
-}).then(() => {
-  l2.on("PacketReceived:ShortCutInit", () => {
-    l2.say("Hello from " + l2.Me.Name);
-    l2.autoShots(1467, true); // enable SSS
-  })
-    .on("PacketReceived:CreatureSay", (packet) => {
-      // var x = 50 + Math.floor(Math.random() * 50) + l2.Me.X;
-      // var y = 50 + Math.floor(Math.random() * 50) + l2.Me.Y;
-      // var z = l2.Me.Z;
-      // l2.moveTo(x, y, z);
-      //console.log(l2.NpcInfo.keys());
-    })
+log("=== L2JS-Client Simple Example ===");
+log(`Conectando em ${CREDENTIALS.Ip} como ${CREDENTIALS.Username}...`);
 
-    .on("PacketReceived:AskJoinParty", (packet) => {
-      l2.acceptJoinParty();
-    })
+// Create a new L2 client instance
+const l2 = new Client();
 
-    .on("PacketReceived:ItemList", (packet) => {
-      //console.log(l2.InventoryItems);
-    })
-
-    .on("RequestedDuel", (event) => {
-      console.log(`A duel has been requested by ${event.data}`);
-    })
-
-    .on("Attacked", (event) => {
-      if (Array.from(event.data.subjects).includes(l2.Me.ObjectId)) {
-        console.log(`I am attacked by ${event.data.object}!!!`);
-        l2.hit(event.data.object);
-        l2.hit(event.data.object);
-      }
-
-      // let creature = l2.CreaturesList.getEntryByObjectId(event.data.object);
-      // if (creature && creature.Target && creature.Name === "Adm") {
-      //   l2.hit(creature.Target);
-      //   l2.hit(creature.Target);
-      // }
-    });
-}).catch(e => console.log(e));
-
-
-var autoAttack = false;
-var follow = false;
-// Follow
-l2.on("StartMoving", ({ data }) => {
-  if (follow && data.creature.Name === "Adm") {
-    l2.moveTo(data.Dx, data.Dy, data.Dz);
-  }
-});
-
-l2.on("Die", ({ data }) => {
-  if (l2.Me.Target && data.creature.ObjectId === l2.Me.Target.ObjectId) {
-    l2.cancelTarget();
-  }
-});
-
-// 51.77.56.145
-
-process.stdin.on("keypress", (str, key) => {
-  if (key.ctrl && key.name === "c") {
-    process.exit();
-  } else if (key.ctrl && key.name === "z") {
-    process.stdout.write("\u001b[3J\u001b[2J\u001b[1J");
-    console.clear();
-  } else {
-    console.log(`You pressed the "${key.name}" key`);
-
-    switch (key.name) {
-      case "x":
-        console.log(l2.Me);
-        break;
-      case "c":
-        console.log(l2.CreaturesList);
-        break;
-      case "f3":
-        console.log(l2.PartyList);
-        break;
-      case "f4":
-        console.log(l2.DroppedItems);
-        break;
-      case "f5":
-        console.log(l2.BuffsList);
-        break;
-      case "f6":
-        console.log(l2.SkillsList);
-        break;
-      case "escape":
-        l2.cancelTarget();
-        break;
-      case "space":
-        var i = l2.DroppedItems.closest();
-        if (i) {
-          l2.hit(i);
-        }
-        break;
-      case "f11":
-        l2.hit(Array.from(l2.CreaturesList)[1].ObjectId);
-        break;
-      case "f12":
-        l2.nextTarget();
-        break;
-      case "tab":
-        l2.inventory();
-        break;
-      case "return":
-        var npc = l2.Me.Target;
-        if (npc) {
-          l2.hit(npc.ObjectId);
-        }
-        break;
-      case "d":
-        l2.requestDuel("Adm");
-        break;
-      case "f":
-        follow = !follow;
-        break;
-      case "a":
-        autoAttack = !autoAttack;
-        break;
-      case "s":
-        l2.sitOrStand();
-        break;
-      case "up":
-        l2.moveTo(l2.Me.X + 50, l2.Me.Y, l2.Me.Z);
-        break;
-      case "down":
-        l2.moveTo(l2.Me.X - 50, l2.Me.Y, l2.Me.Z);
-        break;
-      case "left":
-        l2.moveTo(l2.Me.X, l2.Me.Y + 50, l2.Me.Z);
-        break;
-      case "right":
-        l2.moveTo(l2.Me.X, l2.Me.Y - 50, l2.Me.Z);
-        break;
+// Attempt to login with provided credentials
+// enter() returns a Promise that resolves when login is successful
+l2.enter(CREDENTIALS).then(() => {
+  log(`Login bem-sucedido!`);
+  
+  // Send Appearing packet after initial login to enable movement
+  // Some L2 server implementations require this packet
+  setTimeout(() => {
+    if (l2._gc) {
+      l2._gc.sendPacket(new Appearing());
+      log("Pacote Appearing enviado - movimento habilitado");
     }
-  }
+  }, 1000);
+
+  // ==================== EVENT HANDLERS ====================
+  
+  /**
+   * ShortCutInit is fired when character is fully loaded in game
+   * This is a good place to start your bot logic
+   * 
+   * At this point:
+   * - l2.Me contains your character information
+   * - l2.CreaturesList contains nearby NPCs/players/monsters
+   * - l2.InventoryItems contains your items
+   * - All game objects are loaded and ready
+   */
+  l2.on("PacketReceived:ShortCutInit", () => {
+    log("Personagem totalmente inicializado!");
+    
+    // Check if character is dead on login
+    // If dead, auto-revive before continuing
+    if (l2.Me.IsDead) {
+      log("Personagem está morto ao conectar, revivendo...");
+      setTimeout(() => reviveAtTown(l2), 2000);
+      
+      // After revive, wait 6 seconds and then proceed with the rest
+      // This gives time for the server to process revive and spawn
+      setTimeout(() => {
+        executeMainSequence(l2);
+      }, 6000);
+    } else {
+      // If character is alive, proceed immediately
+      executeMainSequence(l2);
+    }
+  });
+
+}).catch(e => {
+  log(`Erro de conexão: ${e.message || e}`);
+  process.exit(1);
 });
 
-setInterval(() => {
-  if (autoAttack && l2.Me.Target == null) {
-    l2.nextTarget();
-    setTimeout(() => l2.hit(l2.Me.Target), 100);
-    setTimeout(() => l2.hit(l2.Me.Target), 100);
+// ==================== MAIN SEQUENCE ====================
+/**
+ * Main bot sequence - executed after character is fully initialized
+ * @param {Client} l2 - The L2 client instance
+ * 
+ * This function demonstrates:
+ * 1. Sending chat messages
+ * 2. Accessing character properties (l2.Me)
+ * 3. Moving to a location
+ */
+function executeMainSequence(l2) {
+  // 1. Send a chat message to confirm bot is online
+  // Available methods: say(), shout(), tell(), sayToParty(), sayToClan(), etc.
+  try {
+    l2.say("Entrei no jogo!");
+    log("Mensagem enviada: 'Entrei no jogo!'");
+  } catch (e) {
+    log(`Erro ao enviar mensagem: ${e.message}`);
   }
-}, 500);
+  
+  // 2. Display character information in console
+  // l2.Me contains all your character data:
+  // - Name, Level, ClassName (auto-derived from ClassId), HP, MP, Position, etc.
+  log("\n========== INFORMAÇÕES DO PERSONAGEM ==========");
+  log(`Nome: ${l2.Me.Name}`);
+  log(`Level: ${l2.Me.Level}`);
+  log(`Classe: ${l2.Me.ClassName} (ID: ${l2.Me.ClassId})`);
+  log(`HP: ${l2.Me.Hp}/${l2.Me.MaxHp}`);
+  log(`MP: ${l2.Me.Mp}/${l2.Me.MaxMp}`);
+  log(`Posição Atual: X=${l2.Me.X}, Y=${l2.Me.Y}, Z=${l2.Me.Z}`);
+  log(`ObjectId: ${l2.Me.ObjectId}`);
+  log("=============================================\n");
+  
+  // 3. After 10 seconds, move to a new location (X + 300)
+  // moveTo() sends MoveBackwardToLocation packet to the server
+  log("Aguardando 10 segundos antes de mover...");
+  setTimeout(() => {
+    const newX = l2.Me.X + 300;  // Move 300 units in X direction
+    const newY = l2.Me.Y;         // Keep same Y
+    const newZ = l2.Me.Z;         // Keep same Z
+    
+    log(`Movendo para nova posição: X=${newX}, Y=${newY}, Z=${newZ}`);
+    
+    try {
+      l2.moveTo(newX, newY, newZ);
+      log("Comando de movimento enviado com sucesso!");
+    } catch (e) {
+      log(`Erro ao mover: ${e.message}`);
+    }
+  }, 10000);
+}
+
+// ==================== CLEANUP ON EXIT ====================
+/**
+ * Handle Ctrl+C gracefully
+ * Clean up resources and exit the application
+ */
+process.on('SIGINT', () => {
+  log("Encerrando...");
+  // Optionally: l2.logout() to properly disconnect
+  process.exit();
+});
