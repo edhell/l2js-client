@@ -1,68 +1,71 @@
 import IPacketHandler from "../mmocore/IPacketHandler";
 import ReceivablePacket from "../mmocore/ReceivablePacket";
-import Logger from "../mmocore/Logger";
+import AccountKicked from "./serverpackets/AccountKicked";
+import GGAuth from "./serverpackets/GGAuth";
+import Init from "./serverpackets/Init";
+import LoginFail from "./serverpackets/LoginFail";
+import LoginOk from "./serverpackets/LoginOk";
+import PlayFail from "./serverpackets/PlayFail";
+import PlayOk from "./serverpackets/PlayOk";
+import ServerList from "./serverpackets/ServerList";
 import LoginClient from "./LoginClient";
-import * as Packets from "./incoming/login/index";
+import Logger from "../mmocore/Logger";
 
 export default class LoginPacketHandler implements IPacketHandler<LoginClient> {
   protected logger: Logger = Logger.getLogger(this.constructor.name);
 
   // @Override
-  handlePacket(data: Uint8Array, client: LoginClient): ReceivablePacket {
+  handlePacket(data: Uint8Array, client: LoginClient): ReceivablePacket<LoginClient> {
     const opcode: number = data[0] & 0xff;
 
-    let rpk!: ReceivablePacket;
+    let rpk!: ReceivablePacket<LoginClient>;
 
     try {
       switch (opcode) {
         case 0x00:
-          rpk = new Packets.Init();
+          rpk = new Init();
           break;
         case 0x01:
-          rpk = new Packets.LoginFail();
+          rpk = new LoginFail();
           break;
         case 0x02:
-          rpk = new Packets.AccountKicked();
+          rpk = new AccountKicked();
           break;
         case 0x03:
-          rpk = new Packets.LoginOk();
+          rpk = new LoginOk();
           break;
         case 0x04:
-          rpk = new Packets.ServerList();
+          rpk = new ServerList();
           break;
         case 0x06:
-          rpk = new Packets.PlayFail();
+          rpk = new PlayFail();
           break;
         case 0x07:
-          rpk = new Packets.PlayOk();
+          rpk = new PlayOk();
           break;
         case 0x0b:
-          rpk = new Packets.GGAuth();
+          rpk = new GGAuth();
           break;
         default:
-          // no-op
-          break;
-      }
-
-      if (!rpk) {
-        if (data.byteLength > 2) {
-          this.logger.debug(
-            "Unknown game packet received. [0x" +
+          if (data.byteLength > 2) {
+            this.logger.debug(
+              "Unknown game packet received. [0x" +
               opcode.toString(16) +
               " 0x" +
               data[1].toString(16) +
               "] len=" +
               data.byteLength
-          );
-        }
-      } else {
-        // rpk.Client = client;
-        rpk.Buffer = data;
+            );
+          }
+
+          return rpk;
       }
+
+      rpk.Client = client;
+      rpk.Buffer = Uint8Array.from(data);
     } catch (err) {
       this.logger.error(err);
     }
-
     return rpk;
   }
 }

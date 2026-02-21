@@ -1,12 +1,11 @@
 import IStream from "./IStream";
 
 export default class MMOConfig {
-  Username = "";
-  Password = "";
-  ServerId = 1;
-  CharSlotIndex = 0;
+  Username: string = "";
+  Password: string = "";
+  ServerId: number = 1;
+  CharSlotIndex: number = 0;
   Stream: IStream | string = "auto";
-  Ip = "127.0.0.1";
-  Port = 2106;
-  InitialBlowfishKey?: Uint8Array;
+  Ip: string = "127.0.0.1";
+  Port: number = 2106;
 }

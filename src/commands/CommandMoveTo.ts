@@ -1,19 +1,11 @@
 import AbstractGameCommand from "./AbstractGameCommand";
-import MoveBackwardToLocation from "../network/outgoing/game/MoveBackwardToLocation";
-import ValidatePosition from "../network/outgoing/game/ValidatePosition";
+import GameClient from "../network/GameClient";
+import MoveBackwardToLocation from "../network/clientpackets/MoveBackwardToLocation";
 
-export default class CommandMoveTo extends AbstractGameCommand {
+export default class CommandMoveTo extends AbstractGameCommand<GameClient> {
   execute(x: number, y: number, z: number): void {
-    const char = this.GameClient?.ActiveChar;
-
-    if (char) {
-      this.GameClient?.sendPacket(
-        new MoveBackwardToLocation(x, y, z, char.X, char.Y, char.Z)
-      );
-
-      this.GameClient?.sendPacket(
-        new ValidatePosition(char.X, char.Y, char.Z, char.Heading, 0)
-      );
-    }
+    this.Client?.sendPacket(
+      new MoveBackwardToLocation(x, y, z, this.Client.ActiveChar.X, this.Client.ActiveChar.Y, this.Client.ActiveChar.Z)
+    );
   }
 }

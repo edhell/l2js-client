@@ -1,14 +1,15 @@
-import ValidatePosition from "../network/outgoing/game/ValidatePosition";
+import GameClient from "../network/GameClient";
+import ValidatePosition from "../network/clientpackets/ValidatePosition";
 import AbstractGameCommand from "./AbstractGameCommand";
 
-export default class CommandValidatePosition extends AbstractGameCommand {
+export default class CommandValidatePosition extends AbstractGameCommand<GameClient> {
   execute(): void {
-    this.GameClient?.sendPacket(
+    this.Client?.sendPacket(
       new ValidatePosition(
-        this.GameClient.ActiveChar.X,
-        this.GameClient.ActiveChar.Y,
-        this.GameClient.ActiveChar.Z,
-        this.GameClient.ActiveChar.Heading,
+        this.Client.ActiveChar.X,
+        this.Client.ActiveChar.Y,
+        this.Client.ActiveChar.Z,
+        this.Client.ActiveChar.Heading,
         0
       )
     );

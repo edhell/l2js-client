@@ -3,10 +3,7 @@ import L2Object from "./L2Object";
 export default class L2ObjectCollection<T extends L2Object> extends Set<T> {
   public closest(): T {
     const mobs = Array.from(this);
-    return mobs.reduce(
-      (m: T, p: T) => (p.Distance < m.Distance ? p : m),
-      mobs[0]
-    );
+    return mobs.reduce((m: T, p: T) => (p.Distance < m.Distance ? p : m), mobs[0]);
   }
 
   public containsObjectId(objId: number): boolean {
@@ -74,15 +71,5 @@ export default class L2ObjectCollection<T extends L2Object> extends Set<T> {
         this.delete(item);
       }
     }
-  }
-
-  public delete(value: T): boolean {
-    value.offAll();
-    return super.delete(value);
-  }
-
-  public clear() {
-    this.forEach(item => item.offAll());
-    return super.clear();
   }
 }

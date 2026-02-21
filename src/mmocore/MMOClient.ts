@@ -1,70 +1,63 @@
 import ReceivablePacket from "./ReceivablePacket";
 import IPacketHandler from "./IPacketHandler";
-import EventEmitter from "./EventEmitter";
+import { GlobalEvents } from "./EventEmitter";
 import IConnection from "./IConnection";
 import Logger from "./Logger";
 import MMOSession from "./MMOSession";
 import IProcessable from "./IProcessable";
 import SendablePacket from "./SendablePacket";
-import IMMOClientMutator from "./IMMOClientMutator";
-import AbstractPacket from "./AbstractPacket";
-import MMOConfig from "./MMOConfig";
 
-export default abstract class MMOClient extends EventEmitter implements IProcessable {
+export default abstract class MMOClient implements IProcessable {
   protected logger: Logger = Logger.getLogger(this.constructor.name);
 
-  abstract init(config: MMOConfig, connection?: IConnection): this;
+  private _connection!: IConnection;
+
+  private _packetHandler!: IPacketHandler<MMOClient>;
+
+  private _session: MMOSession = new MMOSession();
 
   abstract encrypt(data: Uint8Array, offset: number, size: number): void;
 
   abstract decrypt(data: Uint8Array, offset: number, size: number): void;
 
-  abstract sendPacket(packet: SendablePacket): void;
+  abstract sendPacket(packet: SendablePacket<this>): void;
 
-  abstract pack(packet: SendablePacket): Uint8Array;
+  abstract pack(packet: SendablePacket<this>): Uint8Array;
 
-  PacketHandler!: IPacketHandler<MMOClient>;
+  get Session(): MMOSession {
+    return this._session;
+  }
 
-  Session: MMOSession = new MMOSession();
+  set Session(sess: MMOSession) {
+    this._session = sess;
+  }
 
-  Connection!: IConnection;
+  get Connection(): IConnection {
+    return this._connection;
+  }
 
-  get IsConnected(): boolean {
-    return this.Connection?.IsConnected === true;
+  set Connection(conn: IConnection) {
+    this._connection = conn;
+  }
+
+  get PacketHandler(): IPacketHandler<MMOClient> {
+    return this._packetHandler;
+  }
+
+  set PacketHandler(handler: IPacketHandler<MMOClient>) {
+    this._packetHandler = handler;
   }
 
   private _buffer: Uint8Array = new Uint8Array();
 
-  private _mts: {
-    [index: string]: IMMOClientMutator<MMOClient, AbstractPacket>[];
-  } = {};
-
-  private _mutate(packet: AbstractPacket): void {
-    if (packet.constructor.name in this._mts) {
-      this._mts[packet.constructor.name].forEach((m) => {
-        this.logger.debug("Mutating", this.constructor.name, m.constructor.name);
-        try {
-          m.update(packet);
-        } catch (e) {
-          this.logger.error(e);
-        }
-      });
-    }
-  }
-
-  registerMutator(mutator: IMMOClientMutator<MMOClient, AbstractPacket>): void {
-    if (!(mutator.PacketType in this._mts)) {
-      this._mts[mutator.PacketType] = [];
-    }
-    this._mts[mutator.PacketType].push(mutator);
-  }
-
   connect(): Promise<void> {
-    return this.Connection.connect();
+    return this._connection.connect();
   }
 
-  process(raw: Uint8Array): Promise<ReceivablePacket> {
+  process(raw: Uint8Array): Promise<ReceivablePacket<MMOClient>> {
+
     return new Promise((resolve, reject) => {
+
       let data: Uint8Array = new Uint8Array(raw);
       if (this._buffer.byteLength > 0) {
         data = new Uint8Array(raw.byteLength + this._buffer.byteLength);
@@ -91,20 +84,20 @@ export default abstract class MMOClient extends EventEmitter implements IProcess
           const packetData = new Uint8Array(data.slice(n + 2, n + packetLength)); // +2 is for skipping the packet size
           ctx.decrypt(packetData, 0, packetData.byteLength);
 
-          const rcp: ReceivablePacket = ctx.PacketHandler.handlePacket(packetData, ctx);
-          if (!rcp) {
-            reject(`Cannot find a handler for this packet. Opcode: 0x${(packetData[0] & 0xff).toString(16)}`);
-            return; // We cannot find the required packet handler. Most probably the game packet is not yet implemented.
-          }
+          setTimeout(() => {
+            const rcp: ReceivablePacket<MMOClient> = ctx._packetHandler.handlePacket(packetData, ctx);
+            if (!rcp) {
+              reject("Cannot find the required packet handler");
+              return; // We cannot find the required packet handler. Most probably the game packet is not yet implemented.
+            }
 
-          if (rcp.read()) {
-            this.logger.debug("Received", rcp.constructor.name);
-            this._mutate(rcp);
-            this.fire(`PacketReceived:${rcp.constructor.name}`, {
-              packet: rcp,
-            });
-            resolve(rcp);
-          }
+            if (rcp.read()) {
+              this.logger.debug("Receive", rcp.constructor.name);
+              GlobalEvents.fire(`PacketReceived:${rcp.constructor.name}`, { packet: rcp });
+              resolve(rcp);
+              rcp.run();
+            }
+          }, 0);
         })(i, this);
 
         i += packetLength;
@@ -113,7 +106,8 @@ export default abstract class MMOClient extends EventEmitter implements IProcess
   }
 
   sendRaw(raw: Uint8Array): Promise<void> {
-    return this.Connection.write(raw).catch((error) => this.logger.error(error));
+    return this._connection.write(raw)
+      .catch((error) => this.logger.error(error));
   }
 
   hexString(data: Uint8Array): string {

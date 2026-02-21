@@ -1,21 +1,22 @@
 import AbstractGameCommand from "./AbstractGameCommand";
+import GameClient from "../network/GameClient";
 import L2Character from "../entities/L2Character";
-import RequestDuelStart from "../network/outgoing/game/RequestDuelStart";
+import RequestDuelStart from "../network/clientpackets/RequestDuelStart";
 
-export default class CommandRequestDuel extends AbstractGameCommand {
-  execute(char?: L2Character | string, partyDuel = false): void {
+export default class CommandRequestDuel extends AbstractGameCommand<GameClient> {
+  execute(char?: L2Character | string, partyDuel: boolean = false): void {
     if (char && char instanceof L2Character) {
       char = char.Name;
     }
 
     if (!char) {
-      char = this.GameClient.ActiveChar.Target?.Name;
+      char = this.Client.ActiveChar.Target?.Name;
     }
 
     if (!char) {
       return;
     }
 
-    this.GameClient?.sendPacket(new RequestDuelStart(char, partyDuel));
+    this.Client?.sendPacket(new RequestDuelStart(char, partyDuel));
   }
 }

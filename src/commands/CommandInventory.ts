@@ -1,8 +1,9 @@
 import AbstractGameCommand from "./AbstractGameCommand";
-import RequestItemList from "../network/outgoing/game/RequestItemList";
+import GameClient from "../network/GameClient";
+import RequestItemList from "../network/clientpackets/RequestItemList";
 
-export default class CommandInventory extends AbstractGameCommand {
+export default class CommandInventory extends AbstractGameCommand<GameClient> {
   execute(): void {
-    this.GameClient?.sendPacket(new RequestItemList());
+    this.Client?.sendPacket(new RequestItemList());
   }
 }

@@ -9,7 +9,7 @@ export interface Event {
 export default class EventEmitter {
   _eventHandlers: Record<string, EventHandler[] | undefined> = {};
 
-  on(type: string, handler: EventHandler): boolean {
+  on(type: string, handler: EventHandler) {
     if (!type || !handler) return false;
 
     let handlers = this._eventHandlers[type];
@@ -27,7 +27,7 @@ export default class EventEmitter {
     return true;
   }
 
-  once(type: string, handler: EventHandler): boolean {
+  once(type: string, handler: EventHandler) {
     if (!type || !handler) return false;
 
     const ret = this.on(type, handler);
@@ -38,7 +38,7 @@ export default class EventEmitter {
     return ret;
   }
 
-  off(type?: string, handler?: EventHandler): void {
+  off(type?: string, handler?: EventHandler) {
     if (!type) return this.offAll();
 
     if (!handler) {
@@ -58,34 +58,27 @@ export default class EventEmitter {
     }
   }
 
-  onAll(handler: EventHandler): boolean {
-    return this.on("*", handler);
-  }
-
-  offAll(): void {
+  offAll() {
     this._eventHandlers = {};
   }
 
-  fire(type: string, data?: Record<string, unknown>): void {
+  fire(type: string, data?: any) {
     if (!type) return;
 
-    let handlers = this._eventHandlers[type] ?? [];
-    const allHandlers = this._eventHandlers["*"] ?? [];
-    if (allHandlers && allHandlers.length)
-      handlers = handlers.concat(allHandlers);
-    if (!handlers.length) return;
+    const handlers = this._eventHandlers[type];
+    if (!handlers || !handlers.length) return;
 
     const event = this.createEvent(type, data);
 
     for (const handler of handlers) {
-      const once = (event.once = handler._once === true);
+      if (handler._once) event.once = true;
 
       handler(event);
-      if (once) setTimeout(this.off.bind(this), 0, type, handler); // we should not modify handlers in for loop
+      if (event.once) this.off(type, handler);
     }
   }
 
-  has(type: string, handler?: EventHandler): boolean {
+  has(type: string, handler?: EventHandler) {
     if (!type) return false;
 
     const handlers = this._eventHandlers[type];
@@ -95,17 +88,15 @@ export default class EventEmitter {
     return handlers.indexOf(handler) >= 0;
   }
 
-  getHandlers(type: string): any[] {
+  getHandlers(type: string) {
     if (!type) return [];
     return this._eventHandlers[type] || [];
   }
 
-  createEvent(
-    type: string,
-    data?: Record<string, unknown>,
-    once = false
-  ): Event {
+  createEvent(type: string, data?: any, once = false) {
     const event: Event = { type, data, once };
     return event;
   }
 }
+
+export const GlobalEvents = new EventEmitter();

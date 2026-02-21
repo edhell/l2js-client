@@ -1,0 +1,3 @@
+@echo off
+title Watching...
+tsc -w

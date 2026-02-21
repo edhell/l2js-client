@@ -1,6 +1,6 @@
 export default class Vector {
-  private _x = 0;
-  private _y = 0;
+  private _x: number = 0;
+  private _y: number = 0;
 
   public get X(): number {
     return this._x;
@@ -105,11 +105,11 @@ export default class Vector {
   toAngles(): number {
     return -Math.atan2(-this._y, this._x);
   }
-  angleTo(a: Vector): number {
+  angleTo(a: Vector) {
     return Math.acos(this.dot(a) / (this.length() * a.length()));
   }
 
-  toArray(n?: number): any[] {
+  toArray(n?: number) {
     return [this._x, this._y].slice(0, n || 2);
   }
 
@@ -123,11 +123,11 @@ export default class Vector {
     return this;
   }
 
-  toString(): string {
+  toString() {
     return "x: " + this._x + ", y: " + this._y;
   }
 
-  toObject(): Record<string, unknown> {
+  toObject() {
     return { x: this._x, y: this._y };
   }
 }

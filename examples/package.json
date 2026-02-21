@@ -1,27 +1,19 @@
 {
   "name": "l2js-client-example",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "An example client for l2js-client library",
   "main": "dist/index.js",
   "scripts": {
     "prepare": "tsc",
     "login": "node dist/login.js",
-    "login-create-character": "node dist/login-create-character.js",
-    "accept-resurrect": "node dist/accept-resurrect.js",
-    "adena-painter": "node dist/adena-painter.js",
-    "adena-painter-optimized": "node dist/adena-painter-optimized.js",
     "chat": "node dist/chat.js",
     "move": "node dist/move.js",
     "follow": "node dist/follow.js",
-    "follow-advanced": "node dist/follow-advanced.js",
-    "follow-vector": "node dist/follow-vector.js",
     "bot": "node dist/bot.js",
     "craft": "node dist/craft.js",
-    "revive-town": "node dist/revive-town.js",
     "proxy": "node dist/proxy.js",
     "respond-to-attack": "node dist/respond-to-attack.js",
     "custom-command": "node dist/custom-command.js",
-    "fisherman": "node dist/fisherman.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -29,15 +21,10 @@
   ],
   "author": "Nikolay Petrovski <to.petrovski@gmail.com>",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/npetrovski/l2js-client"
-  },
   "dependencies": {
     "l2js-client": "file:../dist/"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4",
-    "typescript": "^4.7.3"
+    "@types/node": "^13.13.4"
   }
 }

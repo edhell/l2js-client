@@ -1,8 +1,9 @@
-import RequestRecipeItemMakeSelf from "../network/outgoing/game/RequestRecipeItemMakeSelf";
+import GameClient from "../network/GameClient";
+import RequestRecipeItemMakeSelf from "../network/clientpackets/RequestRecipeItemMakeSelf";
 import AbstractGameCommand from "./AbstractGameCommand";
 
-export default class CommandCraft extends AbstractGameCommand {
+export default class CommandCraft extends AbstractGameCommand<GameClient> {
   execute(recipeId: number): void {
-    this.GameClient?.sendPacket(new RequestRecipeItemMakeSelf(recipeId));
+    this.Client?.sendPacket(new RequestRecipeItemMakeSelf(recipeId));
   }
 }

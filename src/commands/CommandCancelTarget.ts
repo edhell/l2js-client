@@ -1,8 +1,9 @@
 import AbstractGameCommand from "./AbstractGameCommand";
-import RequestTargetCancel from "../network/outgoing/game/RequestTargetCancel";
+import GameClient from "../network/GameClient";
+import RequestTargetCancel from "../network/clientpackets/RequestTargetCancel";
 
-export default class CommandCancelTarget extends AbstractGameCommand {
+export default class CommandCancelTarget extends AbstractGameCommand<GameClient> {
   execute(): void {
-    this.GameClient?.sendPacket(new RequestTargetCancel());
+    this.Client?.sendPacket(new RequestTargetCancel());
   }
 }

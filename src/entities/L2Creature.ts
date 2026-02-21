@@ -2,12 +2,7 @@ import L2Object from "./L2Object";
 import { Sex } from "../enums/Sex";
 import { Race } from "../enums/Race";
 import Vector from "../mmocore/Vector";
-import L2ObjectCollection from "./L2ObjectCollection";
-import L2Buff from "./L2Buff";
-import { ClassId } from "../enums/ClassId";
-import { Face } from "../enums/Face";
-import { HairStyle } from "../enums/HairStyle";
-import { HairColor } from "../enums/HairColor";
+import { GlobalEvents } from "../mmocore/EventEmitter";
 
 export default abstract class L2Creature extends L2Object {
   private _hp!: number;
@@ -15,8 +10,6 @@ export default abstract class L2Creature extends L2Object {
   private _maxHp!: number;
   private _maxMp!: number;
   private _isRunning!: boolean;
-  private _isSitting!: boolean;
-  private _isFishing!: boolean;
 
   private _hpPercent!: number;
   private _mpPercent!: number;
@@ -24,15 +17,11 @@ export default abstract class L2Creature extends L2Object {
   private _dx!: number;
   private _dy!: number;
   private _dz!: number;
-  private _pAtk!: number;
-  private _pAtkSpd!: number;
-  private _mAtk!: number;
-  private _mAtkSpd!: number;
-  private _isDead = false;
+
+  private _isDead: boolean = false;
   private _runSpeed!: number;
   private _walkSpeed!: number;
   private _speedMultiplier!: number;
-  private _atkSpdMultiplier!: number;
   private _swimRunSpeed!: number;
   private _swimWalkSpeed!: number;
   private _flyRunSpeed!: number;
@@ -45,33 +34,20 @@ export default abstract class L2Creature extends L2Object {
   private _isTargetable!: boolean;
   private _target!: L2Object | null;
   private _sex!: Sex;
-  private _recommHave!: number;
-  private _classId!: ClassId;
-  private _className!: string;
-  private _baseClassId!: ClassId;
-  private _baseClassName!: string;
-  private _race!: Race;
-  private _isMoving = false;
-  private _movingDistance: number = 0;
-  private _isReady = true;
-  private _karma!: number;
-  private _hairStyle!: HairStyle;
-  private _hairColor!: HairColor;
-  private _face!: Face;
-  private _STR!: number;
-  private _DEX!: number;
-  private _CON!: number;
-  private _INT!: number;
-  private _WIT!: number;
-  private _MEN!: number;
-  private _buffs: L2ObjectCollection<L2Buff> = new L2ObjectCollection();
 
-  public get Buffs(): L2ObjectCollection<L2Buff> {
-    return this._buffs;
-  }
-  public set Buffs(value: L2ObjectCollection<L2Buff>) {
-    this._buffs = value;
-  }
+  private _classId!: number;
+
+  private _className!: string;
+
+  private _baseClassId!: number;
+
+  private _baseClassName!: string;
+
+  private _race!: Race;
+  private _isMoving: boolean = false;
+  private _movingVector!: Vector;
+
+  private _isReady: boolean = true;
 
   public get Race(): Race {
     return this._race;
@@ -89,28 +65,20 @@ export default abstract class L2Creature extends L2Object {
     this._baseClassName = value;
   }
 
-  public get BaseClassId(): ClassId {
+  public get BaseClassId(): number {
     return this._baseClassId;
   }
 
-  public set BaseClassId(value: ClassId) {
+  public set BaseClassId(value: number) {
     this._baseClassId = value;
   }
 
-  public get ClassId(): ClassId {
+  public get ClassId(): number {
     return this._classId;
-  }
-
-  public set ClassId(value: ClassId) {
-    this._classId = value;
   }
 
   public get ClassName(): string {
     return this._className;
-  }
-
-  public set ClassName(value: string) {
-    this._className = value;
   }
 
   public get IsReady(): boolean {
@@ -118,6 +86,14 @@ export default abstract class L2Creature extends L2Object {
   }
   public set IsReady(value: boolean) {
     this._isReady = value;
+  }
+
+  public set ClassId(value: number) {
+    this._classId = value;
+  }
+
+  public set ClassName(value: string) {
+    this._className = value;
   }
 
   public get Sex(): Sex {
@@ -196,14 +172,74 @@ export default abstract class L2Creature extends L2Object {
     return this._hp;
   }
 
+  public get Mp(): number {
+    return this._mp;
+  }
+
+  public get MaxHp(): number {
+    return this._maxHp;
+  }
+
+  public get MaxMp(): number {
+    return this._maxMp;
+  }
+
+  public get IsRunning(): boolean {
+    return this._isRunning;
+  }
+
+  public get HpPercent(): number {
+    return this._hpPercent;
+  }
+
+  public get MpPercent(): number {
+    return this._mpPercent;
+  }
+
+  public get Dx(): number {
+    return this._dx;
+  }
+
+  public get Dy(): number {
+    return this._dy;
+  }
+
+  public get Dz(): number {
+    return this._dz;
+  }
+
+  public get IsDead(): boolean {
+    return this._isDead;
+  }
+
+  public get RunSpeed(): number {
+    return this._runSpeed;
+  }
+
+  public get WalkSpeed(): number {
+    return this._walkSpeed;
+  }
+
+  public get SpeedMultiplier(): number {
+    return this._speedMultiplier;
+  }
+
+  public get IsInCombat(): boolean {
+    return this._isInCombat;
+  }
+
+  public get IsNoble(): boolean {
+    return this._isNoble;
+  }
+
+  public get IsHero(): boolean {
+    return this._isHero;
+  }
+
   public set Hp(value: number) {
     this._hp = value;
     this._hpPercent = (100 * this._hp) / this._maxHp;
     this._isDead = value === 0;
-  }
-
-  public get Mp(): number {
-    return this._mp;
   }
 
   public set Mp(value: number) {
@@ -211,17 +247,9 @@ export default abstract class L2Creature extends L2Object {
     this._mpPercent = (100 * this._mp) / this._maxMp;
   }
 
-  public get MaxHp(): number {
-    return this._maxHp;
-  }
-
   public set MaxHp(value: number) {
     this._maxHp = value;
     this._hpPercent = (100 * this._hp) / this._maxHp;
-  }
-
-  public get MaxMp(): number {
-    return this._maxMp;
   }
 
   public set MaxMp(value: number) {
@@ -229,198 +257,52 @@ export default abstract class L2Creature extends L2Object {
     this._mpPercent = (100 * this._mp) / this._maxMp;
   }
 
-  public get IsRunning(): boolean {
-    return this._isRunning;
-  }
-
   public set IsRunning(value: boolean) {
     this._isRunning = value;
-  }
-
-  public get IsSitting(): boolean {
-    return this._isSitting;
-  }
-
-  public set IsSitting(value: boolean) {
-    this._isSitting = value;
-  }
-
-  public get IsFishing(): boolean {
-    return this._isFishing;
-  }
-
-  public set IsFishing(value: boolean) {
-    this._isFishing = value;
-  }
-
-  public get HpPercent(): number {
-    return this._hpPercent;
   }
 
   public set HpPercent(value: number) {
     this._hpPercent = value;
   }
 
-  public get MpPercent(): number {
-    return this._mpPercent;
-  }
-
   public set MpPercent(value: number) {
     this._mpPercent = value;
-  }
-
-  public get Dx(): number {
-    return this._dx;
   }
 
   public set Dx(value: number) {
     this._dx = value;
   }
 
-  public get Dy(): number {
-    return this._dy;
-  }
-
   public set Dy(value: number) {
     this._dy = value;
-  }
-
-  public get Dz(): number {
-    return this._dz;
   }
 
   public set Dz(value: number) {
     this._dz = value;
   }
 
-  public get IsDead(): boolean {
-    return this._isDead;
-  }
-
   public set IsDead(value: boolean) {
     this._isDead = value;
-  }
-
-  public get RunSpeed(): number {
-    return this._runSpeed;
   }
 
   public set RunSpeed(value: number) {
     this._runSpeed = value;
   }
 
-  public get WalkSpeed(): number {
-    return this._walkSpeed;
-  }
-
   public set WalkSpeed(value: number) {
     this._walkSpeed = value;
-  }
-
-  public get SpeedMultiplier(): number {
-    return this._speedMultiplier;
   }
 
   public set SpeedMultiplier(value: number) {
     this._speedMultiplier = value;
   }
 
-  public get AtkSpdMultiplier(): number {
-    return this._atkSpdMultiplier;
-  }
-
-  public set AtkSpdMultiplier(value: number) {
-    this._atkSpdMultiplier = value;
-  }
-
-  public get PAtk(): number {
-    return this._pAtk;
-  }
-
-  public set PAtk(value: number) {
-    this._pAtk = value;
-  }
-
-  public get PAtkSpd(): number {
-    return this._pAtkSpd;
-  }
-
-  public set PAtkSpd(value: number) {
-    this._pAtkSpd = value;
-  }
-  public get MAtk(): number {
-    return this._mAtk;
-  }
-
-  public set MAtk(value: number) {
-    this._mAtk = value;
-  }
-
-  public get MAtkSpd(): number {
-    return this._mAtkSpd;
-  }
-
-  public set MAtkSpd(value: number) {
-    this._mAtkSpd = value;
-  }
-  public get RecommHave(): number {
-    return this._recommHave;
-  }
-
-  public set RecommHave(value: number) {
-    this._recommHave = value;
-  }
-
-  public get Karma(): number {
-    return this._karma;
-  }
-
-  public set Karma(value: number) {
-    this._karma = value;
-  }
-
-  public get HairStyle(): HairStyle {
-    return this._hairStyle;
-  }
-
-  public set HairStyle(value: HairStyle) {
-    this._hairStyle = value;
-  }
-
-  public get HairColor(): HairColor {
-    return this._hairColor;
-  }
-
-  public set HairColor(value: HairColor) {
-    this._hairColor = value;
-  }
-
-  public get Face(): Face {
-    return this._face;
-  }
-
-  public set Face(value: Face) {
-    this._face = value;
-  }
-
-  public get IsInCombat(): boolean {
-    return this._isInCombat;
-  }
-
   public set IsInCombat(value: boolean) {
     this._isInCombat = value;
   }
 
-  public get IsNoble(): boolean {
-    return this._isNoble;
-  }
-
   public set IsNoble(value: boolean) {
     this._isNoble = value;
-  }
-
-  public get IsHero(): boolean {
-    return this._isHero;
   }
 
   public set IsHero(value: boolean) {
@@ -431,158 +313,66 @@ export default abstract class L2Creature extends L2Object {
     return this._isMoving;
   }
 
-  public get STR(): number {
-    return this._STR;
-  }
-
-  public set STR(value: number) {
-    this._STR = value;
-  }
-
-  public get DEX(): number {
-    return this._DEX;
-  }
-
-  public set DEX(value: number) {
-    this._DEX = value;
-  }
-
-  public get CON(): number {
-    return this._CON;
-  }
-
-  public set CON(value: number) {
-    this._CON = value;
-  }
-
-  public get INT(): number {
-    return this._INT;
-  }
-
-  public set INT(value: number) {
-    this._INT = value;
-  }
-
-  public get WIT(): number {
-    return this._WIT;
-  }
-
-  public set WIT(value: number) {
-    this._WIT = value;
-  }
-  public get MEN(): number {
-    return this._MEN;
-  }
-
-  public set MEN(value: number) {
-    this._MEN = value;
-  }
-
-  public set IsMoving(isMoving: boolean) {
-    const wasMoving = this._isMoving;
-    this._isMoving = isMoving;
-    if (!isMoving) {
-      this._movingDistance = 0;
+  public set IsMoving(value: boolean) {
+    if (value) {
+      GlobalEvents.fire("StartMoving", { creature: this });
+    } else {
+      GlobalEvents.fire("StopMoving", { creature: this });
     }
-    if (isMoving !== wasMoving) {
-      this.fire(`${isMoving ? "Start" : "Stop"}Moving`, { creature: this });
-    }
+    clearInterval(this._moveInterval);
+    this._isMoving = value;
   }
 
-  /**
-   * @returns Distance length that was requested to move
-   */
-  public get MovingDistance(): number {
-    return this._movingDistance;
+  public get MovingVector(): Vector {
+    return this._movingVector;
   }
 
-  public set MovingDistance(value: number) {
-    this._movingDistance = value;
+  public set MovingVector(value: Vector) {
+    this._movingVector = value;
   }
 
   public get CurrentSpeed(): number {
-    return this.IsRunning
-      ? this.RunSpeed * (this.SpeedMultiplier > 0 ? this.SpeedMultiplier : 1)
-      : this.WalkSpeed * (this.SpeedMultiplier > 0 ? this.SpeedMultiplier : 1);
+    return this.IsRunning ? this.RunSpeed * this.SpeedMultiplier : this.WalkSpeed * this.SpeedMultiplier;
   }
 
-  private _moveInterval!: ReturnType<typeof setInterval> | null;
+  private _moveInterval!: ReturnType<typeof setInterval>;
 
-  public setMovingTo(x: number, y: number, z: number, dx: number, dy: number, dz: number, heading?: number): void {
-    if (this._moveInterval) {
-      clearInterval(this._moveInterval);
-
-      // Trigger event as we might changed direction
-      if (this.IsMoving) {
-        this.IsMoving = false;
-      }
-    }
-
+  public setMovingTo(dx: number, dy: number, dz: number, heading?: number) {
     this.Dx = dx;
     this.Dy = dy;
     this.Dz = dz;
+    this.MovingVector = new Vector(dx - this.X, dy - this.Y);
 
-    this.X = x;
-    this.Y = y;
-    this.Z = z;
-
-    if (!heading) {
-      let angleTarget = Math.atan2(dy - y, dx - x) * (180 / Math.PI);
-      if (angleTarget < 0) angleTarget = 360 + angleTarget;
-      this.Heading = Math.floor(angleTarget * 182.044444444);
-    } else {
-      this.Heading = heading;
-    }
-
+    let moveCnt = Math.ceil(this.MovingVector.length() / (this.CurrentSpeed / 10));
     this.IsMoving = true;
 
-    const movingVector: Vector = new Vector(dx - this.X, dy - this.Y);
-    this._movingDistance = movingVector.length();
-
-    let ticks = Math.ceil(this._movingDistance / (this.CurrentSpeed / 10));
-    movingVector.normalize();
-
-    // TODO: Improve this as it will drift for larger movements
     this._moveInterval = setInterval(() => {
-      // Check if movement was not cancelled by the server
-      if (!this.IsMoving) {
-        if (this._moveInterval) clearInterval(this._moveInterval);
-        this._moveInterval = null;
-        return;
-      }
+      this.MovingVector.normalize();
+      this.X += Math.floor(this.MovingVector.X * (this.CurrentSpeed / 10));
+      this.Y += Math.floor(this.MovingVector.Y * (this.CurrentSpeed / 10));
 
-      const dx = Math.floor(movingVector.X * (this.CurrentSpeed / 10));
-      const dy = Math.floor(movingVector.Y * (this.CurrentSpeed / 10));
-
-      this._movingDistance -= Math.sqrt(dx * dx + dy * dy);
-      this.X += dx;
-      this.Y += dy;
-
-      ticks--;
-      if (ticks <= 0) {
+      moveCnt--;
+      if (moveCnt > 0) {
+        this.MovingVector = new Vector(dx - this.X, dy - this.Y);
+      } else {
+        clearInterval(this._moveInterval);
+        this.IsMoving = false;
         this.X = this.Dx;
         this.Y = this.Dy;
-        this._movingDistance = 0;
-
-        this.IsMoving = false;
-
-        if (this._moveInterval) clearInterval(this._moveInterval);
-        this._moveInterval = null;
       }
-    }, 100).unref();
+    }, 100);
   }
 
-  private th!: ReturnType<typeof setTimeout> | null;
+  public th!: ReturnType<typeof setTimeout>;
 
   public set HiTime(value: number) {
     this.IsReady = false;
     if (this.th) {
       clearTimeout(this.th);
-      this.th = null;
     }
 
     this.th = setTimeout(() => {
       this.IsReady = true;
-    }, value).unref();
+    }, value);
   }
 }

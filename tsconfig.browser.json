@@ -1,0 +1,17 @@
+{
+  "declaration": true,
+  "compilerOptions": {
+    "module": "amd",
+    "target": "es6",
+    "lib": ["es5", "es6", "dom"],
+    "outDir": "./browser",
+    "strict": true,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+
+    "experimentalDecorators": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
