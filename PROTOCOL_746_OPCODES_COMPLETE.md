@@ -6,6 +6,98 @@
 
 ---
 
+## 🔀 BYPASS COMMANDS (mods / autofarm)
+
+Observação: muitos mods usam `RequestBypassToServer` (cliente → servidor, opcode `0x21`) para invocar ações administrativas/GUI.
+O servidor normalmente responde com conteúdo HTML (pacote `NpcHtmlMessage`, opcode `0x19`) para atualizar a interface, e/ou com `SystemMessage` (opcode `0x62`) para notificações.
+
+Abaixo estão os padrões de bypass extraídos dos arquivos HTML do mod `autofarm` (path: `game/data/locale/pt_BR/html/mods/autofarm`). Estes são os textos exatos que devem ser enviados via `RequestBypassToServer` para interagir com o mod.
+
+| Padrão de Bypass (string) | Descrição / Parâmetros esperados | Resposta esperada (Servidor → Cliente) |
+|---------------------------|-----------------------------------|----------------------------------------|
+| bypass autofarm change_status | Alterna estado ON/OFF (mesma string usada no link HTML) | `NpcHtmlMessage` (nova página/index atualizada) e possivelmente `SystemMessage` de confirmação |
+| bypass -h autofarm index | Ajuda/atalho para abrir index do mod | `NpcHtmlMessage` com `index.htm` |
+| bypass autofarm help options.htm | Abre página de ajuda/options | `NpcHtmlMessage` com `options.htm` |
+| bypass autofarm list_areas [OPEN|ZONA|ROTA] | Lista áreas (Open/Zone/Route) | `NpcHtmlMessage` contendo lista (`arealist_*.htm`) |
+| bypass autofarm list_areas OPEN | Listar áreas do tipo OPEN | `NpcHtmlMessage` |
+| bypass autofarm list_areas ZONA | Listar zonas | `NpcHtmlMessage` |
+| bypass autofarm list_areas ROTA | Listar rotas | `NpcHtmlMessage` |
+| bypass autofarm zb new ROTA $Name | Criar nova rota (param: nome) | `NpcHtmlMessage` / confirmação via `SystemMessage` |
+| bypass autofarm zb new ZONA $Name | Criar nova zona (param: nome) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm zb edit %id% | Editar zona/rota com id | `NpcHtmlMessage` (areaedit.htm) |
+| bypass autofarm zb save | Salvar alterações (zonedata) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm zb delete %id% | Deletar zona/rota | `SystemMessage` + `NpcHtmlMessage` |
+| bypass autofarm zb addnode %id% | Adicionar nó (rota) | `NpcHtmlMessage` |
+| bypass autofarm zb lock_new_nodes | Alternar lock ao adicionar nós | `NpcHtmlMessage` |
+| bypass autofarm zb preview %id% EDIT | Visualizar preview | `NpcHtmlMessage` |
+| bypass autofarm zb clearnodes | Limpar nós de edição | `NpcHtmlMessage` |
+| bypass autofarm zb save | Salvar zonas/rotas | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm clearpreview | Limpar preview no mapa | `NpcHtmlMessage` |
+| bypass autofarm options | Abrir opções gerais do mod | `NpcHtmlMessage` (arealist_options.htm) |
+| bypass autofarm options radius $Radius | Ajustar radius (param) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm help skills.htm | Abrir lista de skills para macro | `NpcHtmlMessage` |
+| bypass autofarm skills page <page> <index> | Usar skill em slot (page/index) | `NpcHtmlMessage` |
+| bypass autofarm targets page <n> | Paginação/visualização de alvos | `NpcHtmlMessage` (targets.htm) |
+| bypass -h autofarm targets page 1 | Ajuda/atalho para targets | `NpcHtmlMessage` |
+| bypass autofarm targets clear | Limpar alvos selecionados | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm timer | Abrir tela de timer | `NpcHtmlMessage` (timer.htm) |
+| bypass autofarm timer set $Timer | Set timer em minutos (param $Timer) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm macro | Abrir macro page | `NpcHtmlMessage` (macro.htm) |
+| bypass autofarm macro set ESCAPE 0 | Toggle macro ESCAPE | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm macro set LOGOUT 0 | Toggle macro LOGOUT | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm macro %item_bypass% | Macro para item (template) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm macro %skill_bypass% | Macro para skill (template) | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle autopotion | Toggle auto potion | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle attackraid | Toggle atacar raidboss | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle pickup | Toggle pegar loot | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle attacksummon | Toggle atacar summon | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle spoilsweep | Toggle spoil & sweep | `NpcHtmlMessage` / `SystemMessage` |
+| bypass autofarm toggle return | Toggle retorno (return) | `NpcHtmlMessage` / `SystemMessage` |
+
+Observações adicionais:
+- O HTML do mod usa placeholders (`%...%`) e templates para montar os `action="bypass ..."` dinamicamente; alguns comandos incluem parâmetros (IDs, nomes, valores de combobox) e templates para itens/skills.
+- Recomendação para o cliente (`l2js-client`): envie exatamente a string de bypass observada no HTML (por ex. `bypass autofarm change_status`) usando `RequestBypassToServer` (opcode `0x21`) e aguarde `NpcHtmlMessage` para obter a nova página/estado. Também trate `SystemMessage` para confirmações simples.
+
+*** FIM: Seção de BYPASS para o mod `autofarm` ***
+
+---
+
+## 📌 Observações práticas sobre o mod `autofarm` (descobertas durante integração)
+
+- Formato exato: o mod recebe comandos via `RequestBypassToServer` (cliente → servidor) usando opcode `0x21` e a string interna exatamente como aparece no HTML (ex.: `bypass autofarm change_status`).
+- Codificação: envie a string com `writeS()` (UTF-16LE / L2 string writer) e o opcode `0x21` (decimal 33).
+- Resposta do servidor: normalmente o servidor responde com `NpcHtmlMessage` (opcode 0x19) contendo a página HTML atualizada, ou com `SystemMessage` (opcode 0x62) para confirmações rápidas.
+- Comandos importantes (resumo):
+    - `bypass autofarm change_status` — alterna ON/OFF (use esta para ativar/desativar)
+    - `bypass autofarm toggle pickup` — ativa/desativa pegar itens (recomendado ligar antes de ativar autofarm)
+    - `bypass -h autofarm index` / `bypass autofarm index` — abrem o index/help do mod
+
+- Boas práticas de cliente para integração:
+    1. Sempre envie exatamente a string exibida no HTML (`bypass ...`) via `RequestBypassToServer`.
+    2. Ao ativar o `autofarm`, aguarde explicitamente `NpcHtmlMessage` ou `SystemMessage` para confirmar a mudança de estado antes de assumir que foi aplicado.
+    3. Habilite `autofarm toggle pickup` antes de `autofarm change_status` para garantir que o bot pegue loot/herbs.
+    4. Para confiabilidade pós-revive, não dependa de teleports automáticos: faça o personagem andar (cliente -> servidor `MoveBackwardToLocation` request, via `l2.moveTo`) de volta ao ponto inicial, e só então envia `autofarm change_status`.
+
+- Implementação de exemplo (resumida):
+
+```javascript
+// RequestBypassToServer helper (pseudo-code)
+class RawBypass extends SendablePacket {
+    constructor(cmd) { super(); this._cmd = cmd; }
+    write() { this.writeC(0x21); this.writeS(this._cmd); }
+}
+
+// enviar: l2._gc.sendPacket(new RawBypass('autofarm toggle pickup'))
+// depois: l2._gc.sendPacket(new RawBypass('autofarm change_status'))
+```
+
+- Observações encontradas no cliente/protocolo durante investigação:
+    - Foi necessário corrigir no cliente o opcode do pacote de movimento para `MoveBackwardToLocation` (cliente → servidor) para `0x01` — sem isso o servidor ignorava os comandos de movimento.
+    - Em sessões de debug, alguns replies do servidor não vinham em `NpcHtmlMessage`/`SystemMessage` esperados; habilitar logging bruto (`RawPacket`) ajudou a identificar respostas não mapeadas.
+
+---
+
+
 ## 📦 SERVER PACKETS (Servidor → Cliente)
 
 | Opcode | Dec | Packet Name | Arquivo Servidor | Status |

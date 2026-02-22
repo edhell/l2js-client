@@ -207,6 +207,35 @@ l2.on("LoggedIn", () => {
 });
 ```
 
+### Controlling server-side `autofarm` mod
+
+Some servers ship an `autofarm` mod that exposes admin GUI actions via bypass links. Key points when integrating:
+
+- The mod expects `RequestBypassToServer` (opcode `0x21`) with the inner `bypass ...` string exactly as in the HTML (e.g. `bypass autofarm change_status`).
+- Typical flow from client:
+  1. Send `bypass autofarm toggle pickup` to enable loot pickup.
+  2. Send `bypass autofarm change_status` to toggle autofarm.
+  3. Wait for `NpcHtmlMessage` or `SystemMessage` to confirm state change before assuming the mod is active.
+
+Example helper (node runtime):
+
+```javascript
+// Minimal helper to send bypass (uses l2js-client internals)
+const SendablePacket = require('./dist/mmocore/SendablePacket').default;
+class RawBypass extends SendablePacket {
+  constructor(cmd) { super(); this._cmd = cmd; }
+  write() { this.writeC(0x21); this.writeS(this._cmd); }
+}
+
+// Usage:
+// l2._gc.sendPacket(new RawBypass('autofarm toggle pickup'));
+// l2._gc.sendPacket(new RawBypass('autofarm change_status'));
+```
+
+Notes:
+- For revive/return flows prefer walking back via `l2.moveTo(...)` (MoveBackwardToLocation opcode must be 0x01) and only enable autofarm after arrival.
+- If server replies are not obvious, enable raw packet logging to inspect unparsed responses.
+
 ### Fight back
 
 ```ts
