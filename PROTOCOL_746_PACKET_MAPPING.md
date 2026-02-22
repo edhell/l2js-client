@@ -2,16 +2,36 @@
 
 Este arquivo mapeia os opcodes e estruturas corretas dos packets do servidor L2J Protocol 746.
 
+## ✅ CORREÇÕES REALIZADAS (2026-02-21)
+
+### Opcodes Corrigidos no GamePacketHandler.ts:
+1. ✅ **UserInfo**: `0x32` → `0x04` (CORRIGIDO)
+2. ✅ **StatusUpdate**: `0x18` → `0x0E` (CORRIGIDO)
+3. ✅ **MoveToLocation**: `0x2F` → `0x01` (CORRIGIDO)
+4. ✅ **Die**: Adicionado `0x06` (pacote de morte)
+5. ✅ **Revive**: Removido `0x01` (não existe no servidor)
+
+> Nota: As correções acima foram aplicadas no código-fonte (`src/`). Se você estiver usando a versão compilada em `dist/`, execute `npm run compile` para gerar o `dist/` atualizado a partir do `src`.
+
+### Tipos de Dados Corrigidos:
+1. ✅ **CharSelected HP/MP**: `readD()` → `readF()` (CORRIGIDO para FLOAT)
+
+> Observação sobre alterações temporárias em `dist`:
+> - Durante diagnóstico eu inseri logs temporários em arquivos dentro de `dist/` para inspecionar valores brutos. Esses logs foram removidos e as correções finais foram aplicadas no `src/`.
+> - Não é necessário manter alterações manuais em `dist/`; sempre aplique mudanças no `src/` e rode `npm run compile`.
+
+---
+
 ## ❌ PROBLEMAS CRÍTICOS IDENTIFICADOS NO l2js-client:
 
-### 1. **OPCODES INCORRETOS**
-- **UserInfo**: l2js-client espera `0x32`, mas servidor envia `0x04`
-- **StatusUpdate**: l2js-client espera `0x18`, mas servidor envia `0x0E`
+### 1. **OPCODES INCORRETOS** ✅ CORRIGIDOS
+- ~~**UserInfo**: l2js-client espera `0x32`, mas servidor envia `0x04`~~ ✅ CORRIGIDO
+- ~~**StatusUpdate**: l2js-client espera `0x18`, mas servidor envia `0x0E`~~ ✅ CORRIGIDO
 - **CharSelected**: l2js-client espera `0x0B` ou `0x15` (correto!), servidor envia `0x15` ✅
 
-### 2. **TIPOS DE DADOS INCORRETOS**
-- **CharSelected**: HP e MP são escritos como `FLOAT (writeF)` pelo servidor, mas l2js-client lê como `int (readD)`
-- Isso causa field misalignment e valores completamente errados
+### 2. **TIPOS DE DADOS INCORRETOS** ✅ CORRIGIDOS
+- ~~**CharSelected**: HP e MP são escritos como `FLOAT (writeF)` pelo servidor, mas l2js-client lê como `int (readD)`~~ ✅ CORRIGIDO
+- ~~Isso causa field misalignment e valores completamente errados~~ ✅ RESOLVIDO
 
 ---
 

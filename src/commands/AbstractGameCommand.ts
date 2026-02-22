@@ -2,7 +2,7 @@ import ICommand from "./ICommand";
 import MMOClient from "../mmocore/MMOClient";
 import Logger from "../mmocore/Logger";
 
-export default abstract class AbstractGameCommand<T extends MMOClient> implements ICommand {
+export default abstract class AbstractGameCommand<T extends MMOClient = MMOClient> implements ICommand {
   protected logger: Logger = Logger.getLogger(this.constructor.name);
 
   private _client!: T;
@@ -13,6 +13,15 @@ export default abstract class AbstractGameCommand<T extends MMOClient> implement
 
   public set Client(value: T) {
     this._client = value;
+  }
+
+  // Convenience accessors used throughout commands
+  public get GameClient(): any {
+    return this._client as any;
+  }
+
+  public get LoginClient(): any {
+    return this._client as any;
   }
 
   constructor(client?: T) {

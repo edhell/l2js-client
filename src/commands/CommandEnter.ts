@@ -81,7 +81,7 @@ export default class CommandEnter extends AbstractGameCommand {
             this.GameClient.init(gameConfig as MMOConfig);
             this.GameClient.connect()
               .then(() => this.GameClient.sendPacket(new ProtocolVersion()))
-              .catch((e) => reject(e));
+              .catch((e: any) => reject(e));
           });
 
           this.GameClient.once("PacketReceived:KeyPacket", () =>
@@ -116,7 +116,7 @@ export default class CommandEnter extends AbstractGameCommand {
             this.GameClient.sendPacket(new RequestManorList())
               .then(() => this.GameClient.sendPacket(new RequestKeyMapping()))
               .then(() => this.GameClient.sendPacket(new EnterWorld()))
-              .catch((e) => reject("Enter world fail." + e));
+              .catch((e: any) => reject("Enter world fail." + e));
           });
 
           this.GameClient.on("PacketReceived:SystemMessage", (e: EPacketReceived) => {
@@ -143,7 +143,7 @@ export default class CommandEnter extends AbstractGameCommand {
             );
           });
         })
-        .catch((e) => reject(e));
+        .catch((e: any) => reject(e));
     });
   }
 }

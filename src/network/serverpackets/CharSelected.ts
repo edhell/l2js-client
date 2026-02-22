@@ -24,8 +24,8 @@ export default class CharSelected extends GameClientPacket {
     user.Y = this.readD();
     user.Z = this.readD();
 
-    user.Hp = this.readD();
-    user.Mp = this.readD();
+    user.Hp = this.readF(); // CORRIGIDO: HP é FLOAT (writeF no servidor)
+    user.Mp = this.readF(); // CORRIGIDO: MP é FLOAT (writeF no servidor)
 
     this.Client.ActiveChar = user;
     return true;

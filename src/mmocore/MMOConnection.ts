@@ -28,10 +28,18 @@ export default class MMOConnection implements IConnection {
   }
 
   async read(): Promise<void> {
-    const data: Uint8Array = await this._stream.recv();
-    if (data) {
-      this._client.process(data).catch((err) => null);
+    try {
+      const data: Uint8Array = await this._stream.recv();
+      if (data) {
+        //this.logger.debug(`Read ${data.byteLength} bytes from stream`);
+        this._client.process(data).catch((err) => {
+          this.logger.error('Error processing data: ' + (err && err.toString ? err.toString() : err));
+        });
+      }
+    } catch (err) {
+      this.logger.error('Error reading from stream: ' + (err && err.toString ? err.toString() : err));
     }
+    // continue reading
     this.read();
   }
 

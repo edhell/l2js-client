@@ -9,4 +9,5 @@ export default class MMOSession {
     loginOk2!: number;
     username!: string;
     selectedServer!: ServerData;
+    server?: { host: string; port: number };
 }

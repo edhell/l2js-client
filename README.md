@@ -125,6 +125,18 @@ const CREDENTIALS = {
 node example.js
 ```
 
+### Notes about working with source vs compiled files
+
+- Always make changes in `src/` and then run `npm run compile` to produce updated files in `dist/`.
+- Avoid editing files directly inside `dist/` — these are generated artifacts. During debugging we may temporarily add logs to `dist/`, but final fixes should live in `src/` and be compiled.
+- Recent protocol fixes (UserInfo opcode mapping, StatusUpdate opcode, CharSelected HP/MP types) were applied to `src/`. If you pulled changes, run:
+
+```bash
+npm run compile
+```
+
+to regenerate `dist/` before running examples.
+
 ### What the example does:
 
 The `example.js` demonstrates basic bot functionality:

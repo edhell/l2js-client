@@ -42,6 +42,9 @@ export default class NetSocket implements IStream {
     return new Promise((resolve, reject) => {
       // this._socket.once("error", err => reject(err));
       this._socket.once("data", (data: Uint8Array) => {
+        try {
+          //console.log(`[NetSocket] data received: ${data && data.length ? data.length : 0} bytes`);
+        } catch (_) {}
         resolve(data);
         this._socket.pause();
       });

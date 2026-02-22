@@ -1,6 +1,7 @@
 import SendablePacket from "../../../mmocore/SendablePacket";
+import GameClient from "../../GameClient";
 
-export default abstract class GameServerPacket extends SendablePacket {
+export default abstract class GameServerPacket extends SendablePacket<GameClient> {
   static readonly PAPERDOLL_UNDER: number = 0;
   static readonly PAPERDOLL_HEAD: number = 1;
   static readonly PAPERDOLL_HAIR: number = 2;

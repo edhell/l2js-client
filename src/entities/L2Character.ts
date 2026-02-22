@@ -5,6 +5,21 @@ export default class L2Character extends L2Creature {
   private _cp!: number;
   private _maxCp!: number;
   private _level!: number;
+  public _eventHandlers: any; // Used by mutators to preserve event handlers
+  
+  // Additional properties from CharInfo/UserInfo packets
+  public HairStyle!: number;
+  public HairColor!: number;
+  public Face!: number;
+  public Location!: [number, number, number] | [number, number, number, number];
+  public IsSitting!: boolean;
+  public Karma!: number;
+  public MAtkSpd!: number;
+  public PAtkSpd!: number;
+  public AtkSpdMultiplier!: number;
+  public RecommHave!: number;
+  public IsFishing!: boolean;
+  
   public get Cp(): number {
     return this._cp;
   }

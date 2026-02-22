@@ -1,9 +1,10 @@
 import AbstractPacket from "./AbstractPacket";
 import MMOClient from "./MMOClient";
+import { GlobalEvents } from "./EventEmitter";
 
 export default abstract class IMMOClientMutator<
   C extends MMOClient,
-  T extends AbstractPacket
+  T extends AbstractPacket<any>
 > {
   Client: C;
   PacketType: string;
@@ -13,7 +14,7 @@ export default abstract class IMMOClientMutator<
   }
 
   fire(type: string, data?: Record<string, unknown>) {
-    this.Client.fire(type, data);
+    GlobalEvents.fire(type, data);
   }
 
   abstract update(packet: T): void;

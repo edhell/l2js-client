@@ -127,6 +127,8 @@ export default class GamePacketHandler implements IPacketHandler<GameClient> {
 
     let rpk!: ReceivablePacket<GameClient>;
 
+    //try { console.log(`[GamePacketHandler] opcode=0x${opcode.toString(16)} len=${data.length}`); } catch(_){}
+
     try {
       switch (opcode) {
         case 0x00:
@@ -177,7 +179,7 @@ export default class GamePacketHandler implements IPacketHandler<GameClient> {
         case 0x17:
           rpk = new GetItem();
           break;
-        case 0x18:
+        case 0x0e:
           rpk = new StatusUpdate();
           break;
         case 0x19:
@@ -237,7 +239,7 @@ export default class GamePacketHandler implements IPacketHandler<GameClient> {
         case 0x31:
           rpk = new CharInfo();
           break;
-        case 0x32:
+        case 0x04:
           rpk = new UserInfo();
           break;
         case 0x33:
@@ -479,16 +481,25 @@ export default class GamePacketHandler implements IPacketHandler<GameClient> {
               break;
 
             default:
-              if (data.byteLength > 2) {
-                this.logger.debug(
-                  "Unknown game packet received. [0x" +
-                    opcode.toString(16) +
-                    " 0x" +
-                    data[1].toString(16) +
-                    "] len=" +
-                    data.byteLength
-                );
-              }
+                if (data.byteLength > 2) {
+                  try {
+                    if (process && process.env && process.env.L2JSC_VERBOSE_PACKETS) {
+                      const hex = Array.from(data.slice(0, 64)).map(b => b.toString(16).padStart(2,'0')).join(' ');
+                      this.logger.debug(`Unknown game packet received. [0x${opcode.toString(16)} 0x${data[1].toString(16)}] len=${data.byteLength} head=${hex}`);
+                    } else {
+                      this.logger.debug(
+                        "Unknown game packet received. [0x" +
+                          opcode.toString(16) +
+                          " 0x" +
+                          data[1].toString(16) +
+                          "] len=" +
+                          data.byteLength
+                      );
+                    }
+                  } catch (_e) {
+                    this.logger.debug("Unknown game packet received. [0x" + opcode.toString(16) + "] len=" + data.byteLength);
+                  }
+                }
 
               return rpk;
           }
@@ -508,8 +519,19 @@ export default class GamePacketHandler implements IPacketHandler<GameClient> {
           return rpk;
       }
 
-      rpk.Client = client;
-      rpk.Buffer = data;
+      if (rpk) {
+        // Optional verbose per-packet opcode/class logging (enable with env L2JSC_VERBOSE_PACKETS=1)
+        try {
+          if (process && process.env && process.env.L2JSC_VERBOSE_PACKETS) {
+            this.logger.debug(
+              `Recv: opcode=0x${opcode.toString(16)} name=${rpk.constructor.name} len=${data.byteLength}`
+            );
+          }
+        } catch (_err) {}
+
+        rpk.Client = client;
+        rpk.Buffer = data;
+      }
     } catch (err) {
       this.logger.error(err);
     }

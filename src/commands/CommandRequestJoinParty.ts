@@ -16,6 +16,6 @@ export default class CommandJoinParty extends AbstractGameCommand {
             return;
         }
 
-        this.GameClient?.sendPacket(new RequestJoinParty(char));
+        this.GameClient?.sendPacket(new RequestJoinParty(char as string));
     }
 }

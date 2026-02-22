@@ -49,6 +49,18 @@ export default abstract class L2Creature extends L2Object {
   private _movingVector!: Vector;
 
   private _isReady: boolean = true;
+  
+  // Character stats
+  public STR!: number;
+  public DEX!: number;
+  public CON!: number;
+  public INT!: number;
+  public WIT!: number;
+  public MEN!: number;
+  public Location!: [number, number, number] | [number, number, number, number];
+  public MAtkSpd!: number;
+  public PAtkSpd!: number;
+  public AtkSpdMultiplier!: number;
 
   public get Race(): Race {
     return this._race;

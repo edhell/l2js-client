@@ -15,7 +15,7 @@ export default class MoveToLocationMutator extends IMMOClientMutator<
       if (creature) {
         const [_x, _y, _z] = packet.Location;
         const [_xDst, _yDst, _zDst] = packet.Destination;
-        creature.setMovingTo(_x, _y, _z, _xDst, _yDst, _zDst);
+        creature.setMovingTo(_xDst, _yDst, _zDst);
 
         if (creature.ObjectId !== this.Client.ActiveChar.ObjectId) {
           creature.calculateDistance(this.Client.ActiveChar);

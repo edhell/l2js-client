@@ -1,15 +1,17 @@
 import IMMOClientMutator from "../../../mmocore/IMMOClientMutator";
 import GameClient from "../../GameClient";
 import CharInfo from "../../incoming/game/CharInfo";
+import Logger from "../../../mmocore/Logger";
+
+const logger = Logger.getLogger("CharInfoMutator");
 
 export default class CharInfoMutator extends IMMOClientMutator<
   GameClient,
   CharInfo
 > {
   update(packet: CharInfo): void {
-    const char = this.Client.CreaturesList.getEntryByObjectId(
-      packet.Char.ObjectId
-    );
+    logger.debug(`CharInfoMutator.update for ObjectId=${packet.Char ? packet.Char.ObjectId : 'N/A'}`);
+    const char = this.Client.CreaturesList.getEntryByObjectId(packet.Char.ObjectId);
     if (!char) {
       packet.Char.calculateDistance(this.Client.ActiveChar);
       this.Client.CreaturesList.add(packet.Char);
@@ -37,7 +39,7 @@ export default class CharInfoMutator extends IMMOClientMutator<
         char.calculateDistance(this.Client.ActiveChar);
       }
     }
-
     this.fire("CharInfo", { creature: char });
+    logger.debug(`CharInfo applied for ObjectId=${char ? char.ObjectId : 'N/A'} Name=${char ? char.Name : 'N/A'} ClassId=${char ? char.ClassId : 'N/A'}`);
   }
 }

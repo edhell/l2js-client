@@ -11,9 +11,10 @@ export default class PartySpelledMutator extends IMMOClientMutator<
       packet.PartyMemberObjectId
     );
     if (creature) {
-      creature.Buffs.clear();
+      // Buffs is a simple array on party members; reset and push incoming buffs
+      creature.Buffs = [];
       packet.PartyMemberBuffs.forEach((buff) => {
-        creature.Buffs.add(buff);
+        creature.Buffs.push(buff);
       });
 
       this.fire("PartySpelled", { creature });

@@ -41,6 +41,20 @@ export default class L2User extends L2Character {
   private _load!: number;
   private _maxLoad!: number;
 
+  // Public properties for UserInfo packet
+  public HairStyle!: number;
+  public HairColor!: number;
+  public Face!: number;
+  public IsGM!: boolean;
+  public ClanId!: number;
+  public MountType!: number;
+  public PrivateStoreType!: number;
+  public CanCrystalizeItems!: boolean;
+  public MovementType!: number;
+  public ClanPrivileges!: number;
+  public VitalityPoints!: number;
+  public Gauge!: number;
+
   public get AtkSpdMultiplier(): number {
     return this._atkSpdMultiplier;
   }

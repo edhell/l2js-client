@@ -15,9 +15,13 @@ export default class L2ClientObjectCollection<
 
   add(value: T) {
     if (!this.has(value)) {
-      value.onAll((event) => {
-        this.Client.fire(event.type, event.data);
-      });
+      const vAny: any = value;
+      if (typeof vAny.onAll === "function") {
+        vAny.onAll((event: any) => {
+          const { GlobalEvents } = require("../mmocore/EventEmitter");
+          GlobalEvents.fire(event.type, event.data);
+        });
+      }
     }
     return super.add(value);
   }

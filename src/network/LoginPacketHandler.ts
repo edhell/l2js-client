@@ -20,6 +20,8 @@ export default class LoginPacketHandler implements IPacketHandler<LoginClient> {
 
     let rpk!: ReceivablePacket<LoginClient>;
 
+    //try { console.log(`[LoginPacketHandler] opcode=0x${opcode.toString(16)} len=${data.length}`); } catch(_){}
+
     try {
       switch (opcode) {
         case 0x00:

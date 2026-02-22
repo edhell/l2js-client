@@ -7,9 +7,6 @@ import { HairStyle } from "l2js-client/enums/HairStyle";
 import { HairColor } from "l2js-client/enums/HairColor";
 import { Face } from "l2js-client/enums/Face";
 
-// Debug
-process.env.L2JSC_LOG_LEVEL = "8";
-
 const l2 = new Client();
 
 const newCharData = new L2Character({

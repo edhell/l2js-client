@@ -8,8 +8,8 @@ export default class ConfirmDlgMutator extends IMMOClientMutator<
   ConfirmDlg
 > {
   update(packet: ConfirmDlg): void {
-    this.Client.LastConfirmMessageId = packet.messageId;
-    this.Client.LastConfirmMessageRequesterId = packet.RequesterId;
+    (this.Client as any).LastConfirmMessageId = packet.messageId;
+    (this.Client as any).LastConfirmMessageRequesterId = packet.RequesterId;
 
     this.fire("ConfirmDlg", {
       messageId: packet.messageId,

@@ -11,7 +11,8 @@ export default abstract class ReceivablePacket<T extends MMOClient> extends Abst
     this._view = new DataView(this._buffer.buffer);
   }
 
-  abstract run(): void;
+  // Default run implementation is a no-op. Individual packets may override this if needed.
+  run(): void {}
 
   abstract read(): boolean;
 

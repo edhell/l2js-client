@@ -12,7 +12,7 @@ export default class LoginClient extends MMOClient {
 
   private _loginCrypt: LoginCrypt = new LoginCrypt();
   private _blowfishKey!: Uint8Array;
-  private _servers: ServerData[] = [];
+  private _servers: any[] = [];
   private _serverId: number = 1;
   private _config!: MMOConfig;
 
@@ -33,11 +33,11 @@ export default class LoginClient extends MMOClient {
     this._loginCrypt.setKey(blowfishKey);
   }
 
-  get Servers(): ServerData[] {
+  get Servers(): any[] {
     return this._servers;
   }
 
-  set Servers(servers: ServerData[]) {
+  set Servers(servers: any[]) {
     this._servers = servers;
   }
 
